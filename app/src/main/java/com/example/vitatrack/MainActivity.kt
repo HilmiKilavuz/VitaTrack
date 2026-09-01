@@ -25,15 +25,18 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    // Hilt'ten NotificationHelper ve AlarmScheduler'ı istiyoruz
     @Inject
     lateinit var notificationHelper: NotificationHelper
 
     @Inject
     lateinit var alarmScheduler: AlarmScheduler
 
+    // Android 13+ için kullanıcıdan Bildirim İzni isteme penceresini (dialog) yöneten yapı
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
+        // Eğer kullanıcı izin verdiyse alarmı kur
         if (isGranted) {
             scheduleTestAlarm()
         }
@@ -42,7 +45,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Create the notification channel
+        // Uygulama açılır açılmaz bildirim kanalını oluşturuyoruz
         notificationHelper.createNotificationChannel()
 
         setContent {
@@ -54,6 +57,7 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding),
                         contentAlignment = Alignment.Center
                     ) {
+                        // Test Butonu
                         Button(onClick = { requestNotificationPermissionAndSchedule() }) {
                             Text("Test Notification (5 seconds)")
                         }
@@ -63,6 +67,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Android 13 ve üstü bir cihazsa önce bildirim izni var mı diye bakar,
+     * yoksa izin ister. Eski bir cihazsa (veya izin zaten varsa) doğrudan alarmı kurar.
+     */
     private fun requestNotificationPermissionAndSchedule() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             when {
@@ -70,19 +78,23 @@ class MainActivity : ComponentActivity() {
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED -> {
-                    scheduleTestAlarm()
+                    scheduleTestAlarm() // İzin zaten verilmiş
                 }
                 else -> {
+                    // İzin penceresini ekranda göster
                     requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
         } else {
+            // Android 13'ten eskiyse zaten izin istemeye gerek yok
             scheduleTestAlarm()
         }
     }
 
+    /**
+     * Şu anki zamana 5000 milisaniye (5 saniye) ekleyerek sisteme test alarmı kurar.
+     */
     private fun scheduleTestAlarm() {
-        // Schedule an alarm 5 seconds from now
         val time = System.currentTimeMillis() + 5000
         alarmScheduler.schedule("Vitamin D", time)
     }
