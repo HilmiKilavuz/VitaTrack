@@ -1,6 +1,7 @@
 package com.example.vitatrack.ui.supplements
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,7 +36,8 @@ import com.example.vitatrack.domain.model.Supplement
 @Composable
 fun SupplementListScreen(
     viewModel: SupplementListViewModel = hiltViewModel(),
-    onAddClick: () -> Unit = {}
+    onAddClick: () -> Unit = {},
+    onEditClick: (Int) -> Unit = {}
 ) {
     // viewModel'deki StateFlow'u Compose'un anlayacağı State'e çeviriyoruz.
     // Liste her değiştiğinde Compose ekranı otomatik yeniden çizer.
@@ -92,6 +94,7 @@ fun SupplementListScreen(
                 ) { supplement ->
                     SupplementItem(
                         supplement = supplement,
+                        onEditClick = { onEditClick(supplement.id) },
                         onDeleteClick = { viewModel.deleteSupplement(supplement) }
                     )
                 }
@@ -106,10 +109,13 @@ fun SupplementListScreen(
 @Composable
 fun SupplementItem(
     supplement: Supplement,
+    onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onEditClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
