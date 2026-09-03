@@ -9,6 +9,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.vitatrack.domain.notification.NotificationHelper
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.vitatrack.ui.navigation.Routes
+import com.example.vitatrack.ui.supplements.AddEditSupplementScreen
 import com.example.vitatrack.ui.supplements.SupplementListScreen
 import com.example.vitatrack.ui.theme.VitaTrackTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,8 +43,35 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             VitaTrackTheme {
-                // Artık test butonu yerine gerçek listemizi gösteriyoruz
-                SupplementListScreen()
+                val navController = rememberNavController()
+
+                NavHost(
+                    navController = navController,
+                    startDestination = Routes.SUPPLEMENT_LIST
+                ) {
+                    composable(Routes.SUPPLEMENT_LIST) {
+                        SupplementListScreen(
+                            onAddClick = { navController.navigate(Routes.ADD_SUPPLEMENT) },
+                            onEditClick = { id -> navController.navigate(Routes.editSupplement(id)) }
+                        )
+                    }
+                    composable(Routes.ADD_SUPPLEMENT) {
+                        AddEditSupplementScreen(
+                            supplementId = null,
+                            onNavigateBack = { navController.navigateUp() }
+                        )
+                    }
+                    composable(
+                        route = Routes.EDIT_SUPPLEMENT,
+                        arguments = listOf(navArgument("supplementId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val id = backStackEntry.arguments?.getInt("supplementId")
+                        AddEditSupplementScreen(
+                            supplementId = id,
+                            onNavigateBack = { navController.navigateUp() }
+                        )
+                    }
+                }
             }
         }
     }

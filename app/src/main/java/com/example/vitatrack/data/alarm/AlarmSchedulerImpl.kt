@@ -17,7 +17,6 @@ import javax.inject.Inject
 class AlarmSchedulerImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : AlarmScheduler {
-
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
     /**
