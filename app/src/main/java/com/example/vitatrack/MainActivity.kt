@@ -15,8 +15,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.vitatrack.ui.navigation.Routes
-import com.example.vitatrack.ui.supplements.AddEditSupplementScreen
-import com.example.vitatrack.ui.supplements.SupplementListScreen
+import com.example.vitatrack.ui.supplements.add_edit.AddEditSupplementScreen
+import com.example.vitatrack.ui.supplements.list.SupplementListScreen
 import com.example.vitatrack.ui.theme.VitaTrackTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

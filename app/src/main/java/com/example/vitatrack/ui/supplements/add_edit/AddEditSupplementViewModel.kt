@@ -1,4 +1,4 @@
-package com.example.vitatrack.ui.supplements
+package com.example.vitatrack.ui.supplements.add_edit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

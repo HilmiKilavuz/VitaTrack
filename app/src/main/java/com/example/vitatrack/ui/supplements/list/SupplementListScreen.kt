@@ -1,4 +1,4 @@
-package com.example.vitatrack.ui.supplements
+package com.example.vitatrack.ui.supplements.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

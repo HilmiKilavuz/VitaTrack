@@ -1,4 +1,4 @@
-package com.example.vitatrack.ui.supplements
+package com.example.vitatrack.ui.supplements.add_edit
 
 /**
  * Add/Edit ekranının anlık durumunu temsil eden tek bir veri sınıfı.
