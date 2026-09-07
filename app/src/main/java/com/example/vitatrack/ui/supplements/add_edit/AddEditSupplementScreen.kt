@@ -68,15 +68,15 @@ fun AddEditSupplementScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(NavyDark)
+            .background(Teal200) // Köşe boşluklarında teal rengi görünsün
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            // --- Koyu lacivert header ---
+            // --- Teal yeşil header ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(NavyDark)
+                    .background(Teal200)
                     .statusBarsPadding()
                     .padding(vertical = 8.dp)
             ) {
@@ -90,7 +90,7 @@ fun AddEditSupplementScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White
+                        tint = NavyDark
                     )
                 }
                 // Orta: Ekran başlığı
@@ -98,7 +98,7 @@ fun AddEditSupplementScreen(
                     text = screenTitle,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
-                    color = Color.White,
+                    color = NavyDark,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }

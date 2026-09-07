@@ -57,7 +57,7 @@ fun SupplementListScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(NavyDark)
+            .background(Teal200) // Köşe boşluklarında teal rengi görünsün (beyaz kartın yuvarlak köşeleri için)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -65,29 +65,18 @@ fun SupplementListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(NavyDark)
+                    .background(Teal200)
                     .statusBarsPadding()
                     .padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
-                // Sol: Uygulama başlığı
+                // Orta: Uygulama başlığı
                 Text(
                     text = "VitaTrack 💊",
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
-                    color = Color.White,
+                    color = NavyDark,
                     modifier = Modifier.align(Alignment.CenterStart)
                 )
-                // Sağ: Bildirim ikonu (Figma'daki zil ikonu gibi)
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = Color.White
-                    )
-                }
             }
 
             // --- Beyaz içerik kartı (Figma'daki floating white card) ---
