@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.vitatrack.domain.notification.NotificationHelper
@@ -33,6 +34,8 @@ class MainActivity : ComponentActivity() {
     ) { /* İzin verildi/reddedildi, şimdilik sadece logluyoruz */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Status bar şeffaf hale getirilir; header rengi tam üste uzanır
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         // Uygulama açılır açılmaz bildirim kanalını oluşturuyoruz
