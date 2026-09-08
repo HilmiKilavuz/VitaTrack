@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.vitatrack.ui.navigation.Routes
+import com.example.vitatrack.ui.chat.AiChatScreen
 import com.example.vitatrack.ui.supplements.add_edit.AddEditSupplementScreen
 import com.example.vitatrack.ui.supplements.list.SupplementListScreen
 import com.example.vitatrack.ui.theme.VitaTrackTheme
@@ -55,7 +56,8 @@ class MainActivity : ComponentActivity() {
                     composable(Routes.SUPPLEMENT_LIST) {
                         SupplementListScreen(
                             onAddClick = { navController.navigate(Routes.ADD_SUPPLEMENT) },
-                            onEditClick = { id -> navController.navigate(Routes.editSupplement(id)) }
+                            onEditClick = { id -> navController.navigate(Routes.editSupplement(id)) },
+                            onChatClick = { navController.navigate(Routes.AI_CHAT) }
                         )
                     }
                     composable(Routes.ADD_SUPPLEMENT) {
@@ -71,6 +73,11 @@ class MainActivity : ComponentActivity() {
                         val id = backStackEntry.arguments?.getInt("supplementId")
                         AddEditSupplementScreen(
                             supplementId = id,
+                            onNavigateBack = { navController.navigateUp() }
+                        )
+                    }
+                    composable(Routes.AI_CHAT) {
+                        AiChatScreen(
                             onNavigateBack = { navController.navigateUp() }
                         )
                     }

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsOff
+import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -48,7 +49,8 @@ import com.example.vitatrack.ui.theme.TextSecondary
 fun SupplementListScreen(
     viewModel: SupplementListViewModel = hiltViewModel(),
     onAddClick: () -> Unit = {},
-    onEditClick: (Int) -> Unit = {}
+    onEditClick: (Int) -> Unit = {},
+    onChatClick: () -> Unit = {}
 ) {
     // viewModel'deki StateFlow'u Compose'un anlayacağı State'e çeviriyoruz.
     // Liste her değiştiğinde Compose ekranı otomatik yeniden çizer.
@@ -69,7 +71,7 @@ fun SupplementListScreen(
                     .statusBarsPadding()
                     .padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
-                // Orta: Uygulama başlığı
+                // Sol: Uygulama başlığı
                 Text(
                     text = "VitaTrack 💊",
                     fontWeight = FontWeight.Bold,
@@ -77,6 +79,18 @@ fun SupplementListScreen(
                     color = NavyDark,
                     modifier = Modifier.align(Alignment.CenterStart)
                 )
+
+                // Sağ üst: AI Chat butonu
+                IconButton(
+                    onClick = onChatClick,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Chat,
+                        contentDescription = "AI Health Assistant",
+                        tint = NavyDark
+                    )
+                }
             }
 
             // --- Beyaz içerik kartı (Figma'daki floating white card) ---

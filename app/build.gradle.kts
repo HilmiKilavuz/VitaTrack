@@ -19,6 +19,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // API key'i local.properties'den okuyup BuildConfig'e gömüyoruz.
+        // Bu sayede key kaynak koda veya repo'ya girmez.
+        val localProperties = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir, providers)
+        buildConfigField(
+            "String",
+            "GROQ_API_KEY",
+            "\"${localProperties.getProperty("GROQ_API_KEY", "")}\""
+        )
     }
 
     buildTypes {
@@ -34,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -65,4 +75,7 @@ dependencies {
     ksp(libs.room.compiler)
 
     implementation(libs.navigation.compose)
+
+    // OkHttp — Groq REST API çağrıları için (Groq SDK'sız, hafif HTTP istemcisi)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
