@@ -5,8 +5,10 @@ import androidx.room.Room
 import com.example.vitatrack.data.alarm.AlarmSchedulerImpl
 import com.example.vitatrack.data.local.SupplementDao
 import com.example.vitatrack.data.local.SupplementDatabase
+import com.example.vitatrack.data.repository.AiChatRepositoryImpl
 import com.example.vitatrack.data.repository.SupplementRepositoryImpl
 import com.example.vitatrack.domain.alarm.AlarmScheduler
+import com.example.vitatrack.domain.repository.AiChatRepository
 import com.example.vitatrack.domain.repository.SupplementRepository
 import dagger.Binds
 import dagger.Module
@@ -45,6 +47,16 @@ abstract class AppModule {
     abstract fun bindSupplementRepository(
         supplementRepositoryImpl: SupplementRepositoryImpl
     ): SupplementRepository
+
+    /**
+     * AiChatRepository interface'i istendiğinde
+     * AiChatRepositoryImpl gerçek implementasyonu verilir.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindAiChatRepository(
+        aiChatRepositoryImpl: AiChatRepositoryImpl
+    ): AiChatRepository
 
     companion object {
 

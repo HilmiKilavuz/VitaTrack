@@ -13,6 +13,7 @@ object Routes {
     const val SUPPLEMENT_LIST = "supplement_list"
     const val ADD_SUPPLEMENT = "add_supplement"
     const val EDIT_SUPPLEMENT = "edit_supplement/{supplementId}" // {supplementId} dinamik parametre
+    const val AI_CHAT = "ai_chat" // Yapay zeka sohbet ekranı
 
     // Düzenleme ekranına giderken kullanılacak yardımcı fonksiyon
     fun editSupplement(id: Int) = "edit_supplement/$id"
