@@ -25,8 +25,8 @@ android {
         val localProperties = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir, providers)
         buildConfigField(
             "String",
-            "GEMINI_API_KEY",
-            "\"${localProperties.getProperty("GEMINI_API_KEY", "")}\""
+            "GROQ_API_KEY",
+            "\"${localProperties.getProperty("GROQ_API_KEY", "")}\""
         )
     }
 
@@ -76,6 +76,6 @@ dependencies {
 
     implementation(libs.navigation.compose)
 
-    // Gemini AI SDK
-    implementation(libs.google.generativeai)
+    // OkHttp — Groq REST API çağrıları için (Groq SDK'sız, hafif HTTP istemcisi)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
