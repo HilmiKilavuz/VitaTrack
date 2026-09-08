@@ -17,117 +17,107 @@ import javax.inject.Singleton
 /**
  * AiChatRepository'nin Groq API tabanlı implementasyonu.
  *
- * Groq, Llama / Gemma gibi açık kaynak modelleri kendi hızlandırıcı
- * donanımı (LPU) üzerinde ücretsiz çalıştırır.
+ * Groq, Llama gibi açık kaynak modelleri kendi LPU donanımında ücretsiz çalıştırır.
  * Kayıt: https://console.groq.com — kart bilgisi gerekmez.
- *
- * API, OpenAI uyumlu REST formatı kullanır:
- * POST https://api.groq.com/openai/v1/chat/completions
+ * API, OpenAI uyumlu REST formatı kullanır.
  */
 @Singleton
 class AiChatRepositoryImpl @Inject constructor() : AiChatRepository {
 
-    // OkHttp istemcisi: bağlantı & okuma zaman aşımları ayarlandı
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .build()
 
-    /**
-     * System Prompt: Modele kim olduğunu ve nasıl davranacağını söylüyoruz.
-     * Bu direktif kullanıcıya görünmez, sadece AI'yi yönlendirir.
-     */
     private val systemPrompt = """
         Sen VitaTrack uygulamasının sağlık asistanısın. Adın Vita.
         
         Görevin:
         - Kullanıcıların anlattığı şikayetleri, belirtileri veya sağlık hedeflerini dikkatlice dinle.
-        - Bu bilgilere dayanarak hangi vitamin, mineral veya takviye maddelerinin faydalı olabileceğini, 
+        - Bu bilgilere dayanarak hangi vitamin, mineral veya takviye maddelerinin faydalı olabileceğini,
           günlük önerilen dozları ve alım zamanlarını (sabah/akşam, yemek öncesi/sonrası) açıkla.
-        - Yanıtlarını sıcak, anlaşılır ve profesyonel bir dilde ver. Jargondan kaçın.
+        - Yanıtlarını sıcak, anlaşılır ve profesyonel bir dilde ver.
         - Her yanıtının SONUNA MUTLAKA şu uyarıyı ekle:
           "⚠️ Bu bilgiler yalnızca genel sağlık tavsiyesi niteliğindedir. Herhangi bir takviye kullanmadan önce mutlaka doktorunuza danışınız. Acil bir sağlık durumunda vakit kaybetmeden sağlık kuruluşuna başvurunuz."
         
         Sınırlamalar:
-        - Kesinlikle ilaç adı önerme ve ilaç dozu verme. Sadece takviye (supplement) öner.
-        - Tanı koyma. Yalnızca "Bu belirtiler X eksikliğine işaret edebilir" gibi ihtimalli ifadeler kullan.
-        - Kullanıcı sağlıkla alakasız bir şey sorarsa nazikçe "Yalnızca takviye ve sağlık konularında yardımcı olabilirim" de.
+        - Kesinlikle ilaç adı önerme. Sadece takviye (supplement) öner.
+        - Tanı koyma. İhtimalli ifadeler kullan.
+        - Sağlıkla alakasız sorularda: "Yalnızca takviye ve sağlık konularında yardımcı olabilirim" de.
         - Her zaman Türkçe yanıt ver.
     """.trimIndent()
 
     /**
-     * Sohbet geçmişi: Önceki mesajlar burada tutulur.
-     * AI, context'i hatırlayarak tutarlı sohbet sürdürebilir.
+     * Sohbet geçmişi — her sendMessage çağrısında güncellenir.
+     * Groq bu geçmişi okuyarak sohbetin bağlamını (context) hatırlar.
      */
-    private val conversationHistory = mutableListOf<JSONObject>()
+    private val conversationHistory = mutableListOf<Pair<String, String>>() // role -> content
 
     override suspend fun sendMessage(userMessage: String): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
-                // Kullanıcı mesajını geçmişe ekle
-                conversationHistory.add(
-                    JSONObject().apply {
-                        put("role", "user")
-                        put("content", userMessage)
-                    }
+                // 1) Kullanıcı mesajını geçmişe ekle
+                conversationHistory.add("user" to userMessage)
+
+                // 2) messages dizisini string olarak elle inşa et (JSONObject Double sorununu önler)
+                val messagesBuilder = StringBuilder("[")
+
+                // System prompt — ilk sırada
+                messagesBuilder.append(
+                    """{"role":"system","content":${JSONObject.quote(systemPrompt)}}"""
                 )
 
-                // İstek gövdesi oluştur (OpenAI uyumlu format)
-                val messagesArray = JSONArray().apply {
-                    // 1. System prompt (her istekte gönderilir)
-                    put(JSONObject().apply {
-                        put("role", "system")
-                        put("content", systemPrompt)
-                    })
-                    // 2. Sohbet geçmişi
-                    conversationHistory.forEach { put(it) }
+                // Geçmişte ki tüm kullanıcı / asistan mesajları
+                for ((role, content) in conversationHistory) {
+                    messagesBuilder.append(",")
+                    messagesBuilder.append("""{"role":"$role","content":${JSONObject.quote(content)}}""")
                 }
+                messagesBuilder.append("]")
 
-                val requestBody = JSONObject().apply {
-                    put("model", "llama-3.1-8b-instant")  // Groq'taki hızlı ve ücretsiz model
-                    put("messages", messagesArray)
-                    put("max_tokens", 1024)
-                    put("temperature", 0.7)               // Dengeli yaratıcılık
-                }.toString()
+                // 3) İstek gövdesini string olarak oluştur
+                val requestBodyJson = """
+                    {
+                        "model": "groq/compound-mini",
+                        "messages": ${messagesBuilder},
+                        "max_tokens": 1024,
+                        "temperature": 0.7,
+                        "stream": false
+                    }
+                """.trimIndent()
 
-                // HTTP isteği
+                // 4) HTTP POST isteği
                 val request = Request.Builder()
                     .url("https://api.groq.com/openai/v1/chat/completions")
                     .addHeader("Authorization", "Bearer ${BuildConfig.GROQ_API_KEY}")
                     .addHeader("Content-Type", "application/json")
-                    .post(requestBody.toRequestBody("application/json".toMediaType()))
+                    .post(requestBodyJson.toRequestBody("application/json".toMediaType()))
                     .build()
 
                 val response = client.newCall(request).execute()
-                val responseBodyString = response.body?.string()
-                    ?: return@withContext Result.failure(Exception("Boş yanıt alındı"))
+                val responseBodyStr = response.body?.string() ?: ""
 
                 if (!response.isSuccessful) {
-                    // API hata döndürdüyse (ör: geçersiz key) kullanıcıya anlaşılır mesaj ver
+                    // Hata durumunda API'nin tam yanıtını da göster (debug için faydalı)
+                    conversationHistory.removeLastOrNull() // başarısız mesajı geçmişten çıkar
                     return@withContext Result.failure(
-                        Exception("API Hatası ${response.code}: Lütfen API key'inizi kontrol edin.")
+                        Exception("HTTP ${response.code} — $responseBodyStr")
                     )
                 }
 
-                // Yanıtı parse et
-                val jsonResponse = JSONObject(responseBodyString)
-                val aiMessage = jsonResponse
+                // 5) Başarılı yanıtı parse et
+                val aiMessage = JSONObject(responseBodyStr)
                     .getJSONArray("choices")
                     .getJSONObject(0)
                     .getJSONObject("message")
                     .getString("content")
 
-                // AI yanıtını da geçmişe ekle (sonraki mesajlarda AI bunu hatırlasın)
-                conversationHistory.add(
-                    JSONObject().apply {
-                        put("role", "assistant")
-                        put("content", aiMessage)
-                    }
-                )
+                // 6) AI yanıtını da geçmişe ekle
+                conversationHistory.add("assistant" to aiMessage)
 
                 Result.success(aiMessage)
 
             } catch (e: Exception) {
+                conversationHistory.removeLastOrNull()
                 Result.failure(e)
             }
         }
