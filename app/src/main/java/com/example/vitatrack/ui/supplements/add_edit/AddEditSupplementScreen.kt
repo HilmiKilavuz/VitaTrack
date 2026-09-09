@@ -1,6 +1,7 @@
 package com.example.vitatrack.ui.supplements.add_edit
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -10,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -61,6 +63,9 @@ fun AddEditSupplementScreen(
 
     // Saat seçici dialog'unun açık/kapalı durumu
     var showTimePicker by remember { mutableStateOf(false) }
+
+    // Supplement seçici dialog'unun açık/kapalı durumu
+    var showSupplementPicker by remember { mutableStateOf(false) }
 
     // Başlıkta "Add" ya da "Edit" yazısı (moda göre)
     val screenTitle = if (supplementId == null) "Add Supplement" else "Edit Supplement"
@@ -142,23 +147,34 @@ fun AddEditSupplementScreen(
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
 
-                    // İsim alanı (teal focus rengi ile)
+                    // İsim alanı — tıklanınca supplement seçici dialog'u açar
                     OutlinedTextField(
                         value = uiState.name,
-                        onValueChange = { viewModel.onNameChange(it) },
+                        onValueChange = {}, // Salt okunur: klavye ile düzenleme kapalı
                         label = { Text("Supplement Name") },
-                        placeholder = { Text("e.g. Vitamin D") },
-                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Tap to select...") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showSupplementPicker = true },
+                        readOnly = true,
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Words
-                        ),
+                        enabled = false, // Devre dışı görünür ama clickable çalışır
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Teal200,
-                            focusedLabelColor = Teal200,
-                            cursorColor = Teal200
-                        )
+                            disabledBorderColor = if (uiState.name.isNotBlank()) Teal200
+                                                  else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                            disabledLabelColor = if (uiState.name.isNotBlank()) Teal200
+                                                 else TextSecondary,
+                            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                            disabledPlaceholderColor = TextSecondary
+                        ),
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Open picker",
+                                tint = if (uiState.name.isNotBlank()) Teal200 else TextSecondary
+                            )
+                        }
                     )
 
                     // Doz alanı
@@ -308,6 +324,18 @@ fun AddEditSupplementScreen(
                 showTimePicker = false
             },
             onDismiss = { showTimePicker = false }
+        )
+    }
+
+    // Supplement seçici dialog
+    if (showSupplementPicker) {
+        SupplementPickerDialog(
+            currentName = uiState.name,
+            onSupplementSelected = { selected ->
+                viewModel.onNameChange(selected)
+                showSupplementPicker = false
+            },
+            onDismiss = { showSupplementPicker = false }
         )
     }
 }
