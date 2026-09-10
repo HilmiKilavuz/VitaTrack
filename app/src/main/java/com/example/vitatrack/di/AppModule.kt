@@ -73,8 +73,10 @@ abstract class AppModule {
             return Room.databaseBuilder(
                 context,
                 SupplementDatabase::class.java,
-                "vitatrack_db" // Veritabanının dosya adı (telefonda bu isimle saklanır)
-            ).build()
+                "vitatrack_db"
+            )
+                .addMigrations(SupplementDatabase.MIGRATION_1_2) // v1 → v2: streak kolonları
+                .build()
         }
 
         /**
