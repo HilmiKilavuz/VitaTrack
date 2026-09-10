@@ -29,4 +29,14 @@ interface SupplementRepository {
 
     // Takviyeyi siler
     suspend fun deleteSupplement(supplement: Supplement)
+
+    /**
+     * "Bugün aldım" işaretlemesi yapar.
+     *
+     * Streak mantığı:
+     * - Bugün zaten alındıysa    → hiçbir şey yapma (idempotent)
+     * - Dün alındıysa            → streak +1
+     * - Daha eskiyse / hiç alınmadıysa → streak = 1 (yeniden başla)
+     */
+    suspend fun markAsTaken(supplement: Supplement)
 }

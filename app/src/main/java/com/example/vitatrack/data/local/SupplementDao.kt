@@ -45,4 +45,15 @@ interface SupplementDao {
      */
     @Delete
     suspend fun deleteSupplement(supplement: Supplement)
+
+    /**
+     * Belirli bir takviyenin "son alınma tarihi" ve "streak sayısını" günceller.
+     * Bu sorgu yalnızca iki kolonu günceller — diğer alanlar değişmez.
+     *
+     * @param id            Güncellenecek takviyenin ID'si
+     * @param lastTakenDate Bugünün tarihi "yyyy-MM-dd" formatında
+     * @param streakCount   Yeni streak değeri
+     */
+    @Query("UPDATE supplements SET lastTakenDate = :lastTakenDate, streakCount = :streakCount WHERE id = :id")
+    suspend fun markAsTaken(id: Int, lastTakenDate: String, streakCount: Int)
 }

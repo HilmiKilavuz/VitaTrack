@@ -42,11 +42,20 @@ class SupplementListViewModel @Inject constructor(
 
     /**
      * Bir takviyeyi silen fonksiyon.
-     * launch: Silme işlemini arka planda yapar, UI donmaz.
      */
     fun deleteSupplement(supplement: Supplement) {
         viewModelScope.launch {
             repository.deleteSupplement(supplement)
+        }
+    }
+
+    /**
+     * "Bugün aldım" butonuna basılınca çağrılır.
+     * Streak hesaplama mantığı Repository katmanında yapılır.
+     */
+    fun markAsTaken(supplement: Supplement) {
+        viewModelScope.launch {
+            repository.markAsTaken(supplement)
         }
     }
 }
